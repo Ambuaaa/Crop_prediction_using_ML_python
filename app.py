@@ -2,66 +2,66 @@ import streamlit as st
 import numpy as np
 import pickle
 
-st.set_page_config(page_title="Crop Yield Predictor", layout="centered")
+st.set_page_config(page_title="Crop Yield Prediction", layout="centered")
 
-# Use CSS through markdown
+# Load model and preprocessor
+@st.cache_resource(show_spinner=False)
+def load_models():
+    model = pickle.load(open('dtr.pkl', 'rb'))
+    preprocessor = pickle.load(open('preprocessor.pkl', 'rb'))
+    return model, preprocessor
+
+dtr, preprocessor = load_models()
+
+# CSS styling to match original HTML look
 st.markdown("""
     <style>
-        .main-container {
-            background-color: #f5f5dc;
-            padding: 2rem;
-            border-radius: 10px;
-        }
-        .heading {
-            text-align: center;
-            color: #0f5132;
-        }
-        .sub-heading {
-            text-align: center;
-            color: #14532d;
-        }
-        .prediction {
-            text-align: center;
-            color: #b91c1c;
-            font-size: 1.5rem;
-            margin-top: 2rem;
-        }
+    body {
+        background-color: darkkhaki;
+    }
+    .container {
+        background-color: beige;
+        padding: 30px;
+        border-radius: 10px;
+        margin-top: 30px;
+    }
+    .title {
+        text-align: center;
+        color: green;
+    }
+    .predict {
+        text-align: center;
+        color: red;
+        font-size: 24px;
+        margin-top: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 class='heading'>Crop Yield Prediction Per Country</h1>", unsafe_allow_html=True)
-
-# Load model and preprocessor using updated caching
-@st.cache_resource(show_spinner=False)
-def load_model():
-    with open("dtr.pkl", "rb") as f:
-        model = pickle.load(f)
-    with open("preprocessor.pkl", "rb") as f:
-        preprocessor = pickle.load(f)
-    return model, preprocessor
-
-dtr, preprocessor = load_model()
+# Main Title
+st.markdown("<h1 class='title'>Crop Yield Prediction Per Country</h1>", unsafe_allow_html=True)
 
 with st.container():
-    st.markdown("<div class='main-container'>", unsafe_allow_html=True)
-    st.markdown("<h2 class='sub-heading'>Crop Features Here</h2>", unsafe_allow_html=True)
+    st.markdown("<div class='container'>", unsafe_allow_html=True)
+    st.markdown("<h2 class='title'>Crop Features Here</h2>", unsafe_allow_html=True)
 
     with st.form("predict_form"):
         Year = st.number_input("Year", step=1, value=2024)
-        average_rain_fall_mm_per_year = st.number_input("Average Rainfall (mm/year)", step=0.1)
-        pesticides_tonnes = st.number_input("Pesticides Used (tonnes)", step=0.1)
-        avg_temp = st.number_input("Average Temperature (°C)", step=0.1)
-        Area = st.text_input("Area (State or Country)")
-        Item = st.text_input("Crop Type")
-        submit_button = st.form_submit_button(label='Predict')
+        average_rain_fall_mm_per_year = st.number_input("average_rain_fall_mm_per_year", step=0.1)
+        pesticides_tonnes = st.number_input("pesticides_tonnes", step=0.1)
+        avg_temp = st.number_input("avg_temp", step=0.1)
+        Area = st.text_input("Area")
+        Item = st.text_input("Item")
 
-    if submit_button:
+        submit = st.form_submit_button("Predict")
+
+    if submit:
         if not Area or not Item:
             st.warning("Please fill in all fields.")
         else:
-            input_data = np.array([[Year, average_rain_fall_mm_per_year, pesticides_tonnes, avg_temp, Area, Item]])
-            transformed_data = preprocessor.transform(input_data)
-            prediction = dtr.predict(transformed_data)[0]
-            st.markdown(f"<div class='prediction'>Predicted Yield Production: {prediction:.2f} hg/ha</div>", unsafe_allow_html=True)
+            features = np.array([[Year, average_rain_fall_mm_per_year, pesticides_tonnes, avg_temp, Area, Item]])
+            transformed = preprocessor.transform(features)
+            predicted_value = dtr.predict(transformed)[0]
+            st.markdown(f"<div class='predict'>Predicted Yield Production: {predicted_value:.2f} hg/ha</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)

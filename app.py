@@ -1,29 +1,38 @@
 import streamlit as st
 import numpy as np
-import pandas as pd
 import pickle
 
-# Load your model and preprocessor
-dtr = pickle.load(open('dtr.pkl', 'rb'))
-preprocessor = pickle.load(open('preprocessor.pkl', 'rb'))
+# Title and layout
+st.set_page_config(page_title="Crop Yield Predictor", layout="centered")
+st.markdown("<h1 style='text-align: center; color: green;'>🌾 Crop Yield Prediction Per Country</h1>", unsafe_allow_html=True)
+st.write("---")
 
-st.title("🌾 Crop Yield Prediction App")
+# Load model and preprocessor
+@st.cache(allow_output_mutation=True)
+def load_objects():
+    with open("dtr.pkl", "rb") as f:
+        model = pickle.load(f)
+    with open("preprocessor.pkl", "rb") as f:
+        preprocessor = pickle.load(f)
+    return model, preprocessor
 
-# Input fields
-Year = st.text_input("Year")
-average_rain_fall_mm_per_year = st.number_input("Average Rainfall (mm/year)")
-pesticides_tonnes = st.number_input("Pesticide Usage (tonnes)")
-avg_temp = st.number_input("Average Temperature (°C)")
-Area = st.text_input("Area (State)")
-Item = st.text_input("Crop Name")
+dtr, preprocessor = load_objects()
 
-if st.button("Predict"):
-    if not all([Year, Area, Item]):
-        st.warning("Please fill all text inputs")
+# Input form
+with st.form("prediction_form"):
+    Year = st.number_input("Year", step=1, value=2024)
+    rainfall = st.number_input("Average Rainfall (mm/year)", step=0.1)
+    pesticides = st.number_input("Pesticides (tonnes)", step=0.1)
+    avg_temp = st.number_input("Average Temperature (°C)", step=0.1)
+    Area = st.text_input("Area (State)")
+    Item = st.text_input("Crop Name")
+    submit = st.form_submit_button("Predict")
+
+if submit:
+    if not Area or not Item:
+        st.warning("Please fill all text fields.")
     else:
-        features = np.array([[Year, average_rain_fall_mm_per_year, pesticides_tonnes, avg_temp, Area, Item]])
-        transformed_features = preprocessor.transform(features)
-        predicted_value = dtr.predict(transformed_features).reshape(1, -1)
-
-        st.success(f"✅ Predicted Crop Yield: {predicted_value[0][0]:.2f} hg/ha")
-
+        features = np.array([[Year, rainfall, pesticides, avg_temp, Area, Item]])
+        transformed = preprocessor.transform(features)
+        pred = dtr.predict(transformed)[0]
+        st.success(f"✅ Predicted Crop Yield: {pred:.2f} hg/ha")

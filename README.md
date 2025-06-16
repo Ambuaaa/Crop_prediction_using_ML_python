@@ -1,4 +1,5 @@
 # 🌾 Crop Yield Prediction using Supervised Machine Learning
+🚀 **Live Demo**: [Click here to try the app](https://croppredictionusingmlpython-gcmycxyy3ysssqj3ubgfrg.streamlit.app/)
 
 This project aims to predict **crop yield in advance** by analyzing various environmental and agricultural factors. By using supervised machine learning techniques, the model provides farmers and agricultural planners with insights to choose the best crop and optimize planning for better yield outcomes.
 
@@ -87,5 +88,16 @@ The dataset includes the following columns:
 ## 🙌 Acknowledgements
 
 Inspired by real-world problems in Indian agriculture and guided by various machine learning tutorials.
+
+---
+## 📷 Screenshots
+
+### 🏠 Homepage
+![Homepage](https://github.com/user-attachments/assets/26a1aebc-1a02-466d-b8c0-143979114399)
+
+### 📊 Prediction Result
+![Answer](https://github.com/user-attachments/assets/b4771b65-50d0-4242-8faf-f57578f9d792)
+
+
 
 

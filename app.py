@@ -3,29 +3,36 @@ import numpy as np
 import pickle
 
 st.set_page_config(page_title="Crop Yield Predictor", layout="centered")
+
+# Use CSS through markdown
 st.markdown("""
     <style>
         .main-container {
-            background-color: darkkhaki;
+            background-color: #f5f5dc;
             padding: 2rem;
             border-radius: 10px;
         }
         .heading {
             text-align: center;
-            color: green;
+            color: #0f5132;
         }
         .sub-heading {
             text-align: center;
-            color: darkgreen;
+            color: #14532d;
+        }
+        .prediction {
+            text-align: center;
+            color: #b91c1c;
+            font-size: 1.5rem;
+            margin-top: 2rem;
         }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 class='heading'>Crop Yield Prediction Per Country</h1>", unsafe_allow_html=True)
-st.write("---")
 
-# Load model and preprocessor using new caching logic
-@st.cache_resource
+# Load model and preprocessor using updated caching
+@st.cache_resource(show_spinner=False)
 def load_model():
     with open("dtr.pkl", "rb") as f:
         model = pickle.load(f)
@@ -55,6 +62,6 @@ with st.container():
             input_data = np.array([[Year, average_rain_fall_mm_per_year, pesticides_tonnes, avg_temp, Area, Item]])
             transformed_data = preprocessor.transform(input_data)
             prediction = dtr.predict(transformed_data)[0]
-            st.success(f"Predicted Yield Production: {prediction:.2f} hg/ha")
+            st.markdown(f"<div class='prediction'>Predicted Yield Production: {prediction:.2f} hg/ha</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
